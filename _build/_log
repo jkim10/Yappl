@@ -1,0 +1,34 @@
+### Starting build.
+# Target: microc.ml.depends, tags: { extension:ml, file:microc.ml, ocaml, ocamldep, quiet }
+ocamldep.opt -modules microc.ml > microc.ml.depends # cached
+# Target: ast.ml.depends, tags: { extension:ml, file:ast.ml, ocaml, ocamldep, quiet }
+ocamldep.opt -modules ast.ml > ast.ml.depends # cached
+# Target: ast.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:ast.cmo, file:ast.ml, implem, ocaml, quiet }
+ocamlc.opt -c -o ast.cmo ast.ml # cached
+# Target: irgen.ml.depends, tags: { extension:ml, file:irgen.ml, ocaml, ocamldep, quiet }
+ocamldep.opt -modules irgen.ml > irgen.ml.depends # cached
+# Target: sast.ml.depends, tags: { extension:ml, file:sast.ml, ocaml, ocamldep, quiet }
+ocamldep.opt -modules sast.ml > sast.ml.depends # cached
+# Target: sast.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:sast.cmo, file:sast.ml, implem, ocaml, quiet }
+ocamlc.opt -c -o sast.cmo sast.ml # cached
+# Target: microcparse.mly, tags: { extension:mly, file:microcparse.mly, infer, ocaml, ocamlyacc, parser, quiet }
+ocamlyacc microcparse.mly # cached
+# Target: microcparse.mli.depends, tags: { extension:mli, file:microcparse.mli, ocaml, ocamldep, quiet }
+ocamldep.opt -modules microcparse.mli > microcparse.mli.depends # cached
+# Target: microcparse.cmi, tags: { byte, compile, extension:mli, file:microcparse.mli, interf, ocaml, quiet }
+ocamlc.opt -c -o microcparse.cmi microcparse.mli # cached
+# Target: scanner.mll, tags: { extension:mll, file:scanner.mll, lexer, ocaml, ocamllex, quiet }
+ocamllex.opt -q scanner.mll # cached
+# Target: scanner.ml.depends, tags: { extension:ml, file:scanner.ml, ocaml, ocamldep, quiet }
+ocamldep.opt -modules scanner.ml > scanner.ml.depends # cached
+# Target: semant.ml.depends, tags: { extension:ml, file:semant.ml, ocaml, ocamldep, quiet }
+ocamldep.opt -modules semant.ml > semant.ml.depends # cached
+# Target: irgen.cmo, tags: { byte, compile, extension:cmo, extension:ml, file:irgen.cmo, file:irgen.ml, implem, ocaml, quiet }
+ocamlc.opt -c -o irgen.cmo irgen.ml
++ ocamlc.opt -c -o irgen.cmo irgen.ml
+File "irgen.ml", line 15, characters 11-15:
+15 | module L = Llvm
+                ^^^^
+Error: Unbound module Llvm
+Command exited with code 2.
+# Compilation unsuccessful.
