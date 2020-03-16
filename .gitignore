@@ -1,3 +1,12 @@
 build/*
 build
 _build
+
+# MacOS Users
+.DS_Store
+
+# From JWong Video Chat
+microc.native
+example.out
+example.ll
+a.out
