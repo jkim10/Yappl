@@ -1,6 +1,10 @@
+# Builds
 build/*
 build
 _build
+
+# C_Code
+c_code/sampling
 
 # MacOS Users
 .DS_Store
