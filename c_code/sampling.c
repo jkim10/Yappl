@@ -9,7 +9,6 @@ float get_closest_tenth_value(int num){
 }
 
 void generate_samples(float *array_address, int num) {
-  srand(time(0));
   int sample;
   float closest_tenth;
   for (int i = 0; i < num; i++) {
@@ -23,13 +22,46 @@ void generate_samples(float *array_address, int num) {
 #ifdef BUILD_TEST
 int main()
 {
+  // setting the random seed
+  srand(time(0));
+
+  // 1D example
   int sample_size = 5;
-  float samples_array[sample_size];
-
-  generate_samples(samples_array, sample_size);
-
+  float samples_1D_array[sample_size];
+  generate_samples(samples_1D_array, sample_size);
   for (int i = 0; i < sample_size ; i++) {
-    printf("samples_array[%d]: %f\n", i, samples_array[i]);
+    printf("samples_1D_array[%d]: %f\n", i, samples_1D_array[i]);
+  }
+
+  // 2D example
+  int sample_size_x = 4, sample_size_y = 3;
+  float samples_2D_array[sample_size_x][sample_size_y];
+  for (int i = 0; i < sample_size_x; i++){
+    generate_samples(samples_2D_array[i], sample_size_y);
+  }
+  for (int i = 0; i < sample_size_x; i++){
+    for (int j = 0; j < sample_size_y; j++) {
+      printf("%f, ", samples_2D_array[i][j]);
+    }
+    printf("\n");
+  }
+
+  // 3D example
+  float samples_3D_array[sample_size_x][sample_size_y][sample_size];
+  for (int i = 0; i < sample_size_x; i++){
+    for (int j = 0; j < sample_size_y; j++) {
+      generate_samples(samples_3D_array[i][j], sample_size);
+    }
+  }
+  for (int i = 0; i < sample_size_x; i++){
+    for (int j = 0; j < sample_size_y; j++) {
+      printf("[");
+      for (int k = 0; k < sample_size; k++) {
+        printf("%f, ", samples_3D_array[i][j][k]);
+      }
+      printf("], ");
+    }
+    printf("\n");
   }
 }
 #endif
