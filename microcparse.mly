@@ -4,9 +4,10 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN
+%token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN COLON
 %token EQ NEQ LT AND OR
 %token IF ELSE WHILE INT BOOL
+%token DIST
 /* return, COMMA token */
 %token RETURN COMMA
 %token <int> LITERAL
@@ -95,9 +96,13 @@ expr:
   | expr AND    expr { Binop($1, And,   $3)   }
   | expr OR     expr { Binop($1, Or,    $3)   }
   | ID ASSIGN expr   { Assign($1, $3)         }
+  | ID DIST expr
   | LPAREN expr RPAREN { $2                   }
   /* call */
   | ID LPAREN args_opt RPAREN { Call ($1, $3)  }
+  /* distribution assignment */
+  | expr DIST LBRACE stmt_list RBRACE       { Dist($1,$4) }
+  | expr COLON expr                         { AssignD($1,$3) }
 
 /* args_opt*/
 args_opt:
