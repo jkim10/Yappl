@@ -83,6 +83,7 @@ stmt:
   | WHILE LPAREN expr RPAREN stmt           { While ($3, $5)  }
   /* return */
   | RETURN expr SEMI                        { Return $2      }
+    /* distribution assignment */
 
 expr:
     LITERAL          { Literal($1)            }
@@ -96,13 +97,15 @@ expr:
   | expr AND    expr { Binop($1, And,   $3)   }
   | expr OR     expr { Binop($1, Or,    $3)   }
   | ID ASSIGN expr   { Assign($1, $3)         }
-  | ID DIST expr
+  | ID DIST LBRACE outcomes RBRACE       { Dist($1,$4) }
+  | ID COLON expr  { AssignD($1,$3)         }
   | LPAREN expr RPAREN { $2                   }
   /* call */
   | ID LPAREN args_opt RPAREN { Call ($1, $3)  }
-  /* distribution assignment */
-  | expr DIST LBRACE stmt_list RBRACE       { Dist($1,$4) }
-  | expr COLON expr                         { AssignD($1,$3) }
+
+outcomes:
+  /* nothing */ { [] }
+  | expr COLON outcomes  { $1::$3 }
 
 /* args_opt*/
 args_opt:
