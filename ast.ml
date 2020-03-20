@@ -44,7 +44,7 @@ let string_of_op = function
   | Less -> "<"
   | And -> "&&"
   | Or -> "||"
-  | Mod -> "mod"
+  | Mod -> "%"
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l

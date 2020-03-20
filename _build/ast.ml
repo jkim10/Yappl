@@ -44,7 +44,7 @@ let string_of_op = function
   | Less -> "<"
   | And -> "&&"
   | Or -> "||"
-  | Mod -> "mod"
+  | Mod -> "%"
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
@@ -79,7 +79,6 @@ let string_of_fdecl fdecl =
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
-
 let string_of_program (vars, funcs) =
   "\n\nParsed program: \n\n" ^
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^

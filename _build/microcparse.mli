@@ -7,6 +7,7 @@ type token =
   | PLUS
   | MINUS
   | ASSIGN
+  | MOD
   | EQ
   | NEQ
   | LT
