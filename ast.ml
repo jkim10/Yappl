@@ -1,6 +1,6 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
-type op = Add | Sub | Equal | Neq | Less | And | Or
+type op = Add | Sub | Equal | Neq | Less | And | Or | Mod
 
 type typ = Int | Bool
 
@@ -41,6 +41,7 @@ type program = bind list * func_def list
 let string_of_op = function
     Add -> "+"
   | Sub -> "-"
+  | Mod -> "%"
   | Equal -> "=="
   | Neq -> "!="
   | Less -> "<"
@@ -82,7 +83,6 @@ let string_of_fdecl fdecl =
   String.concat "" (List.map string_of_vdecl fdecl.locals) ^
   String.concat "" (List.map string_of_stmt fdecl.body) ^
   "}\n"
-
 let string_of_program (vars, funcs) =
   "\n\nParsed program: \n\n" ^
   String.concat "" (List.map string_of_vdecl vars) ^ "\n" ^
