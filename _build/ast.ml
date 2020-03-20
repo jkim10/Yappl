@@ -39,12 +39,12 @@ type program = bind list * func_def list
 let string_of_op = function
     Add -> "+"
   | Sub -> "-"
+  | Mod -> "%"
   | Equal -> "=="
   | Neq -> "!="
   | Less -> "<"
   | And -> "&&"
   | Or -> "||"
-  | Mod -> "%"
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l

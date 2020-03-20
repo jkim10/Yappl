@@ -15,9 +15,9 @@ int main() {
   int y;
   a = 18;
   b = 9;
-  x = 2;
-  y = 14;
-  print(x mod y);
+  x = 14;
+  y = 3;
+  print(x % y);
   print(gcd(3,15));
   print(gcd(99,121));
   print(gcd(a,b));
