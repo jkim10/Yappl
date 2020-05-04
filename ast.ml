@@ -12,6 +12,8 @@ type expr =
   | Assign of string * expr
   (* function call *)
   | Call of string * expr list
+  | AssignD of string * expr
+  | Dist of string * expr list
 
 type stmt =
     Block of stmt list
@@ -56,6 +58,8 @@ let rec string_of_expr = function
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
   | Call(f, el) ->
       f ^ "(" ^ String.concat ", " (List.map string_of_expr el) ^ ")"
+  | AssignD(v,e) -> v ^ " : " ^ string_of_expr e
+  | Dist(v,e) -> v ^ " := " ^ String.concat ", " (List.map string_of_expr e)
 
 let rec string_of_stmt = function
     Block(stmts) ->

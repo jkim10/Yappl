@@ -13,6 +13,7 @@ rule token = parse
 | '{'      { LBRACE }
 | '}'      { RBRACE }
 | ';'      { SEMI }
+| ':'	   { COLON }
 (* COMMA *)
 | ','      { COMMA }
 | '+'      { PLUS }
@@ -27,6 +28,8 @@ rule token = parse
 | "if"     { IF }
 | "else"   { ELSE }
 | "while"  { WHILE }
+(* Sampling *)
+| ":="	   { DIST }
 (* RETURN *)
 | "return" { RETURN }
 | "int"    { INT }
