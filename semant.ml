@@ -83,13 +83,6 @@ let check (globals, functions) =
     (* Return a semantically-checked expression, i.e., with a type *)
     let rec check_expr = function
         Literal l -> (Int, SLiteral l)
-      | Dist(var,dist) as ex ->
-        let lt = type_of_identifier var
-        and (rt, e') = check_expr e in
-        let err = "illegal assignment " ^ string_of_typ lt ^ " = " ^
-                  string_of_typ rt ^ " in " ^ string_of_expr ex
-        in
-        (check_assign lt rt err, SAssign(var, (rt, e')))
       | BoolLit l -> (Bool, SBoolLit l)
       | Id var -> (type_of_identifier var, SId var)
       | Assign(var, e) as ex ->

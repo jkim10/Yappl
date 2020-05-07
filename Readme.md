@@ -6,12 +6,12 @@ ocamlbuild -pkgs llvm microc.native
 
 ### Run the MicroC compiler and generate llvm code
 ```
-./microc.native -l example.mc > example.ll
+./microc.native -l example.mc > example.out
 ```
 
 ### Run the llvm code
 ```
-clang example.ll
+lli example.out
 ```
 
 ### Compiler files
