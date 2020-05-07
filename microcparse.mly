@@ -7,8 +7,12 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD
 %token EQ NEQ LT AND OR
 <<<<<<< HEAD
+<<<<<<< HEAD
 %token IF ELSE WHILE INT BOOL FLOAT
 %token DIST
+=======
+%token IF ELSE WHILE INT BOOL
+>>>>>>> parent of 84e13a1... Merge pull request #1 from jkim10/carlos+jkim/sampling
 =======
 %token IF ELSE WHILE INT BOOL
 >>>>>>> parent of 84e13a1... Merge pull request #1 from jkim10/carlos+jkim/sampling
