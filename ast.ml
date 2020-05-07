@@ -2,11 +2,10 @@
 
 type op = Add | Sub | Equal | Neq | Less | And | Or | Mod
 
-type typ = Int | Bool | Float
+type typ = Int | Bool
 
 type expr =
     Literal of int
-  | FloLit of float
   | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
@@ -51,7 +50,6 @@ let string_of_op = function
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
-  | FloLit(l) -> string_of_float l
   | BoolLit(true) -> "true"
   | BoolLit(false) -> "false"
   | Id(s) -> s
@@ -74,7 +72,6 @@ let rec string_of_stmt = function
 
 let string_of_typ = function
     Int -> "int"
-  | Float -> "float"
   | Bool -> "bool"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
