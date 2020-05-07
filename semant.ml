@@ -83,6 +83,7 @@ let check (globals, functions) =
     (* Return a semantically-checked expression, i.e., with a type *)
     let rec check_expr = function
         Literal l -> (Int, SLiteral l)
+<<<<<<< HEAD
       | FloLit l -> (Float, SFloLit l)
       | Dist(var,dist) as ex ->
         let lt = type_of_identifier var
@@ -91,6 +92,8 @@ let check (globals, functions) =
                   string_of_typ rt ^ " in " ^ string_of_expr ex
         in
         (check_assign lt rt err, SAssign(var, (rt, e')))
+=======
+>>>>>>> parent of 84e13a1... Merge pull request #1 from jkim10/carlos+jkim/sampling
       | BoolLit l -> (Bool, SBoolLit l)
       | Id var -> (type_of_identifier var, SId var)
       | Assign(var, e) as ex ->
