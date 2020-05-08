@@ -28,13 +28,14 @@ let translate (globals, functions) =
 
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
+  and f_t      = L.float_type    context
   and i8_t       = L.i8_type     context
   and i1_t       = L.i1_type     context in
 
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
       A.Int   -> i32_t
-    | A.Float   -> i32_t
+    | A.Float -> f_t
     | A.Bool  -> i1_t
   in
 
@@ -99,7 +100,7 @@ let translate (globals, functions) =
     (* Construct code for an expression; return its value *)
     let rec build_expr builder ((_, e) : sexpr) = match e with
         SLiteral i  -> L.const_int i32_t i
-      | SFloLit f -> L.const_float i32_t f
+      | SFloLit f -> L.const_float f_t f
       | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)
       | SId s       -> L.build_load (lookup s) s builder
       | SAssign (s, e) -> let e' = build_expr builder e in
