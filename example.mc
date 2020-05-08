@@ -10,15 +10,14 @@ int gcd(int a, int b) {
   return a;
 }
 
-float main() {
+int main() {
   float x;
   int y;
   a = 18;
   b = 9;
   x = 14.0;
   y = 3;
-  print(x);
   print(gcd(99,121));
   print(gcd(a,b));
-  return 0.0;
+  return 0;
 }
