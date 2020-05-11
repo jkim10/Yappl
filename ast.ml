@@ -2,7 +2,7 @@
 
 type op = Add | Sub | Equal | Neq | Less | And | Or | Mod
 
-type typ = Int | Bool
+type typ = Int | Bool | Dist
 
 type expr =
     Literal of int
@@ -69,6 +69,7 @@ let rec string_of_stmt = function
 let string_of_typ = function
     Int -> "int"
   | Bool -> "bool"
+  | Dist -> "dist"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

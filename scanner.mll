@@ -30,6 +30,7 @@ rule token = parse
 (* RETURN *)
 | "return" { RETURN }
 | "int"    { INT }
+| "dist"   { DIST }
 | "bool"   { BOOL }
 | "true"   { BLIT(true)  }
 | "false"  { BLIT(false) }

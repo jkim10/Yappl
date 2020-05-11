@@ -30,12 +30,16 @@ let translate (globals, functions) =
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
   and i1_t       = L.i1_type     context in
-
+  let struct_dist_t : L.lltype = 
+    L.named_struct_type context "Dist" in
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
       A.Int   -> i32_t
     | A.Bool  -> i1_t
+    | A.Dist   -> struct_dist_t
   in
+
+  let _ = L.struct_set_body struct_dist_t [| L.pointer_type i8_t |] false in
 
   (* Create a map of global variables after creating each *)
   let global_vars : L.llvalue StringMap.t =
@@ -48,6 +52,16 @@ let translate (globals, functions) =
     L.var_arg_function_type i32_t [| L.pointer_type i8_t |] in
   let printf_func : L.llvalue =
     L.declare_function "printf" printf_t the_module in
+
+  (* Declare Foo functions *)
+  let sample_t : L.lltype =
+    L.function_type (L.void_type context)
+    [| L.pointer_type struct_dist_t |] in
+
+  let sample : L.llvalue =
+    L.declare_function "sample" sample_t the_module in
+  let initDist : L.llvalue =
+    L.declare_function "initDist" sample_t the_module in
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -80,7 +94,11 @@ let translate (globals, functions) =
       (* Allocate space for any locally declared variables and add the
        * resulting registers to our map *)
       and add_local m (t, n) =
-        let local_var = L.build_alloca (ltype_of_typ t) n builder
+        let local_var = L.build_alloca (ltype_of_typ t) n builder in
+        let _ = (match t with
+        | A.Dist -> L.build_call initDist [| local_var |] "" builder;
+                    L.build_call sample [| local_var |] "" builder;
+        | _ -> local_var)
         in StringMap.add n local_var m
       in
 
