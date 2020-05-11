@@ -7,4 +7,4 @@ compile:
 
 .PHONY: clean
 clean:
-	rm -rf sampling distribution *.o a.out
+	rm -rf sampling distribution *.o *.dSYM a.out
