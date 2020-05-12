@@ -69,6 +69,16 @@ fdecl:
       body=$7
     }
   }
+  | stmt_list 
+  {
+    {
+      rtyp=Int;
+      fname="main";
+      formals=[];
+      locals=[];
+      body=$1
+    }
+  }
 
 /* formals_opt */
 formals_opt:
