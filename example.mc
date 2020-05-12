@@ -11,14 +11,12 @@ int gcd(int a, int b) {
 }
 
 int main() {
-  int x;
+  float x;
   int y;
   a = 18;
   b = 9;
-  x = 14;
+  x = 14.0;
   y = 3;
-  print(x % y);
-  print(gcd(3,15));
   print(gcd(99,121));
   print(gcd(a,b));
   return 0;
