@@ -9,16 +9,9 @@ int gcd(int a, int b) {
   }
   return a;
 }
+int x; 
+x = 11;
+print(x);
+print(444);
+return 0;
 
-int main() {
-  float x;
-  int y;
-  dist z;
-  a = 18;
-  b = 9;
-  x = 14.0;
-  y = 3;
-  print(gcd(99,121));
-  print(gcd(a,b));
-  return 0;
-}
