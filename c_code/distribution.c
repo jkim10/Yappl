@@ -31,38 +31,38 @@ void push(struct Node** head_ref, int size) {
     (*head_ref) = new_node;
 }
 
-void pop(struct Node **head_ref, int pop_idx) {
-    struct Node* temp = *head_ref, *prev;
-    int current_idx = 0;
+void pop(struct Node **head_ref, int position)
+{
+   if (*head_ref == NULL) { return; }
 
-    if (temp != NULL && (current_idx == pop_idx)) {
-        *head_ref = temp->next;
-        printf("\n--- Removing Card: %s\n", temp->card_value);
-        free(temp);
-        return;
-    }
-    ++current_idx;
+   struct Node* temp = *head_ref;
 
-    while (temp != NULL && (current_idx != pop_idx)){
-        prev = temp;
-        temp = temp->next;
-        ++current_idx;
-    }
+   if (position == 0) {
+     *head_ref = temp->next;
+     free(temp);
+     return;
+   }
 
-    if (temp == NULL) {
-      return;
-    } else {
-      printf("\n--- Removing Card: %s\n", temp->card_value);
-      prev->next = temp->next;
-      free(temp);
-    }
+   for (int i=0; temp!=NULL && i<position-1; i++){
+     temp = temp->next;
+   }
+
+   if (temp == NULL || temp->next == NULL) { return; }
+
+   struct Node *next = temp->next->next;
+   free(temp->next);
+   temp->next = next;
 }
 
-void printList(struct Node *node, int size) {
+void printList(struct Node **head_ref, int size) {
+  if (size <= 0) {
+    return;
+  }
   printf("--- Number of Cards: %d\n", size);
-  while (node != NULL)  {
-    printf("value: %s   \tprob: %f\n", node->card_value, node->probability);
-    node = node->next;
+  struct Node* temp = *head_ref;
+  while (temp != NULL) {
+    printf("value: %s   \tprob: %f\n", temp->card_value, temp->probability);
+    temp = temp->next;
   }
 }
 
@@ -75,6 +75,9 @@ void editDistribution(struct Node **head_ref, int size){
 }
 
 void removeRandomCard(struct Node ** head_ref, int new_size){
+  if (new_size <= 0) {
+    return;
+  }
   int randomnumber = rand()%(1+new_size);
   pop(head_ref, randomnumber);
   editDistribution(head_ref, new_size);
@@ -84,17 +87,21 @@ int main() {
     srand(time(0));
     struct Node *start = NULL;
     start = NULL;
-    int input_size = 4;
+    int input_size = 5; // CHANGE ME TO ADD NUMBER
     for (int i=0; i < input_size; i++) {
        push(&start, input_size);
     }
-    printList(start, input_size);
+    printList(&start, input_size);
 
-    removeRandomCard(&start, --input_size);
-    printList(start, input_size);
+    input_size -= 1;
 
-    removeRandomCard(&start, --input_size);
-    printList(start, input_size);
+    removeRandomCard(&start, input_size);
+    printList(&start, input_size);
+
+    input_size -= 1;
+
+    removeRandomCard(&start, input_size);
+    printList(&start, input_size);
 
     return 0;
 }
