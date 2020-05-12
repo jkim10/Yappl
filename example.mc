@@ -13,6 +13,7 @@ int gcd(int a, int b) {
 int main() {
   float x;
   int y;
+  dist z;
   a = 18;
   b = 9;
   x = 14.0;

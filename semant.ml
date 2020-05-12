@@ -26,12 +26,19 @@ let check (globals, functions) =
   check_binds "global" globals;
 
   (* Collect function declarations for built-in functions: no bodies *)
-  let built_in_decls =
+  let add_print_int =
     StringMap.add "print" {
       rtyp = Int;
       fname = "print";
       formals = [(Int, "x")];
       locals = []; body = [] } StringMap.empty
+  in
+  let built_in_decls =
+    StringMap.add "print_s" {
+      rtyp = String;
+      fname = "print_s";
+      formals = [(String, "x")];
+      locals = []; body = [] } add_print_int
   in
 
   (* Add function name to symbol table *)
@@ -85,6 +92,7 @@ let check (globals, functions) =
         Literal l -> (Int, SLiteral l)
       | FloLit l -> (Float, SFloLit l)
       | BoolLit l -> (Bool, SBoolLit l)
+      | StringLit s -> (String, SStringLit s)
       | Id var -> (type_of_identifier var, SId var)
       | Assign(var, e) as ex ->
         let lt = type_of_identifier var
