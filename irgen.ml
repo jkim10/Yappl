@@ -29,7 +29,10 @@ let translate (globals, functions) =
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
   and i8_t       = L.i8_type     context
-  and i1_t       = L.i1_type     context in
+  and i1_t       = L.i1_type     context
+  and void_t = L.void_type context
+  and ptr_t  = L.pointer_type (L.i8_type (context))  
+  in
   let struct_dist_t : L.lltype = 
     L.named_struct_type context "Dist" in
   (* Return the LLVM type for a MicroC type *)
@@ -37,9 +40,10 @@ let translate (globals, functions) =
       A.Int   -> i32_t
     | A.Bool  -> i1_t
     | A.Dist   -> struct_dist_t
+    | A.String -> ptr_t
   in
 
-  let _ = L.struct_set_body struct_dist_t [| L.pointer_type i8_t |] false in
+  let _ = L.struct_set_body struct_dist_t [| L.pointer_type i1_t |] false in
 
   (* Create a map of global variables after creating each *)
   let global_vars : L.llvalue StringMap.t =
@@ -120,6 +124,7 @@ let translate (globals, functions) =
       | SId s       -> L.build_load (lookup s) s builder
       | SAssign (s, e) -> let e' = build_expr builder e in
         ignore(L.build_store e' (lookup s) builder); e'
+      | SStringLit str -> L.build_global_stringptr str "tmp" builder
       | SBinop (e1, op, e2) ->
         let e1' = build_expr builder e1
         and e2' = build_expr builder e2 in
@@ -133,6 +138,8 @@ let translate (globals, functions) =
          | A.Neq     -> L.build_icmp L.Icmp.Ne
          | A.Less    -> L.build_icmp L.Icmp.Slt
         ) e1' e2' "tmp" builder
+      | SCall ("print_s",[e])->
+        L.build_call printf_func [| (build_expr builder e) |] "printf" builder
       | SCall ("print", [e]) ->
         L.build_call printf_func [| int_format_str ; (build_expr builder e) |]
           "printf" builder

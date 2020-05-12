@@ -9,6 +9,7 @@ and sx =
   | SId of string
   | SBinop of sexpr * op * sexpr
   | SAssign of string * sexpr
+  | SStringLit of string
   (* call *)
   | SCall of string * sexpr list
 

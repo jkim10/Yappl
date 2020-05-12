@@ -6,8 +6,9 @@ open Ast
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD
 %token EQ NEQ LT AND OR
-%token IF ELSE WHILE INT BOOL DIST
+%token IF ELSE WHILE INT BOOL DIST STR
 /* return, COMMA token */
+%token <string> STRING
 %token RETURN COMMA
 %token <int> LITERAL
 %token <bool> BLIT
@@ -48,6 +49,7 @@ typ:
     INT   { Int   }
   | BOOL  { Bool  }
   | DIST   { Dist   }
+  | STR { String }
 
 /* fdecl */
 fdecl:
@@ -97,6 +99,7 @@ expr:
   | expr LT     expr { Binop($1, Less,  $3)   }
   | expr AND    expr { Binop($1, And,   $3)   }
   | expr OR     expr { Binop($1, Or,    $3)   }
+  | STRING       { StringLit($1) } 
   | ID ASSIGN expr   { Assign($1, $3)         }
   | LPAREN expr RPAREN { $2                   }
   /* call */
