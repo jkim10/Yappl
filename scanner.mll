@@ -32,11 +32,13 @@ rule token = parse
 | "int"    { INT }
 | "dist"   { DIST }
 | "bool"   { BOOL }
+| "float"  { FLOAT }
 | "true"   { BLIT(true)  }
 | "false"  { BLIT(false) }
 | "string" { STR }
 | '"'      { read_string (Buffer.create 17) lexbuf }
 | digit+ as lem  { LITERAL(int_of_string lem) }
+| digit+ ['.'] digit+ as lem { FLIT(float_of_string lem) }
 | letter (digit | letter | '_')* as lem { ID(lem) }
 | eof { EOF }
 | _ as char { raise (Failure("illegal character " ^ Char.escaped char)) }

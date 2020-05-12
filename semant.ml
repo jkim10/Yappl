@@ -90,6 +90,7 @@ let check (globals, functions) =
     (* Return a semantically-checked expression, i.e., with a type *)
     let rec check_expr = function
         Literal l -> (Int, SLiteral l)
+      | FloLit l -> (Float, SFloLit l)
       | BoolLit l -> (Bool, SBoolLit l)
       | StringLit s -> (String, SStringLit s)
       | Id var -> (type_of_identifier var, SId var)
@@ -113,8 +114,10 @@ let check (globals, functions) =
           (* Determine expression type based on operator and operand types *)
           let t = match op with
               Add | Sub | Mod when t1 = Int -> Int
+            | Add | Sub | Mod when t1 = Float -> Float
             | Equal | Neq -> Bool
             | Less when t1 = Int -> Bool
+            | Less when t1 = Float -> Bool
             | And | Or when t1 = Bool -> Bool
             | _ -> raise (Failure err)
           in

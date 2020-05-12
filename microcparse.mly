@@ -6,12 +6,17 @@ open Ast
 
 %token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD
 %token EQ NEQ LT AND OR
+
 %token IF ELSE WHILE INT BOOL DIST STR
+
+%token IF ELSE WHILE INT BOOL FLOAT DIST STR
+
 /* return, COMMA token */
 %token <string> STRING
 %token RETURN COMMA
 %token <int> LITERAL
 %token <bool> BLIT
+%token <float> FLIT
 %token <string> ID
 %token EOF
 
@@ -47,6 +52,7 @@ vdecl:
 
 typ:
     INT   { Int   }
+  | FLOAT { Float }
   | BOOL  { Bool  }
   | DIST   { Dist   }
   | STR { String }
@@ -89,6 +95,7 @@ stmt:
 
 expr:
     LITERAL          { Literal($1)            }
+  | FLIT             { FloLit ($1)            }
   | BLIT             { BoolLit($1)            }
   | ID               { Id($1)                 }
   | expr PLUS   expr { Binop($1, Add,   $3)   }
