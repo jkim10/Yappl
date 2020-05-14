@@ -17,4 +17,4 @@ dist.o: dist.h dist.c
 clean:
 	ocamlbuild -clean
 	rm -f *.native 
-	rm -f *.o *.a *.s a.out *.byte
+	rm -f *.o *.a *.s a.out *.byte llvm.out
