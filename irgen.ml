@@ -28,7 +28,7 @@ let translate (globals, functions) =
 
   (* Get types from the context *)
   let i32_t      = L.i32_type    context
-  and f_t      = L.float_type    context
+  and f_t        = L.double_type context
   and i8_t       = L.i8_type     context
   and i1_t       = L.i1_type     context
   and ptr  = L.pointer_type (L.i8_type (context))  
@@ -85,6 +85,7 @@ let translate (globals, functions) =
     let builder = L.builder_at_end context (L.entry_block the_function) in
 
     let int_format_str = L.build_global_stringptr "%d\n" "fmt" builder in
+    let float_format_str = L.build_global_stringptr "%f\n" "fmt" builder in
 
     (* Construct the function's "locals": formal arguments and locally
        declared variables.  Allocate each on the stack, initialize their
@@ -147,25 +148,62 @@ let translate (globals, functions) =
       | SBinop (e1, op, e2) ->
         let e1' = build_expr builder e1
         and e2' = build_expr builder e2 in
+        let ets = L.string_of_lltype (L.type_of e1') in
         (match op with
-           A.Add     -> L.build_add
-         | A.Sub     -> L.build_sub
+           A.Add     -> 
+            (match ets with
+                    "double" -> L.build_fadd
+                    |"i32" -> L.build_add
+              | _ -> raise(Failure("Ints and floats can be added")) )
+         | A.Sub     ->
+            (match ets with
+               "double" -> L.build_fsub
+                    |"i32" -> L.build_sub
+              | _ -> raise(Failure("Ints and floats can be subtracted")) )
          | A.Mod     -> L.build_urem
          | A.And     -> L.build_and
          | A.Or      -> L.build_or
-         | A.Equal   -> L.build_icmp L.Icmp.Eq
-         | A.Neq     -> L.build_icmp L.Icmp.Ne
-         | A.Less    -> L.build_icmp L.Icmp.Slt
-         |A.Mult     -> (let ets = L.string_of_lltype (L.type_of e1') in 
+         | A.Equal   -> 
+            (match ets with
+               "double" -> L.build_fcmp L.Fcmp.Oeq
+                    |"i32" -> L.build_icmp L.Icmp.Eq 
+              | _ -> raise(Failure("Ints and floats can be compared")))
+         | A.Neq     ->
+            (match ets with
+               "double" -> L.build_fcmp L.Fcmp.One
+                    |"i32" -> L.build_icmp L.Icmp.Ne 
+              | _ -> raise(Failure("Ints and floats can be compared")))
+         | A.Less    ->
+            (match ets with
+               "double" -> L.build_fcmp L.Fcmp.Ult
+                    |"i32" -> L.build_icmp L.Icmp.Slt  
+              | _ -> raise(Failure("Ints and floats can be compared")))
+         | A.Leq     ->
+            (match ets with
+               "double" -> L.build_fcmp L.Fcmp.Ule
+                    |"i32" -> L.build_icmp L.Icmp.Sle  
+              | _ -> raise(Failure("OIts and floats can be compared")))
+         | A.Greater ->
+            (match ets with
+               "double" -> L.build_fcmp L.Fcmp.Ugt
+                    |"i32" -> L.build_icmp L.Icmp.Sgt  
+              | _ -> raise(Failure("Ints and floats can be compared")))
+         | A.Geq     ->
+            (match ets with
+               "double" -> L.build_fcmp L.Fcmp.Uge
+                    |"i32" -> L.build_icmp L.Icmp.Sge  
+              | _ -> raise(Failure("Ints and floats can be compared")))
+
+         | A.Mult     ->
             (match ets with
                "double" -> L.build_fmul
                     |"i32" -> L.build_mul   
-              | _ -> raise(Failure("Only ints and floats can be divided")) ))
-         |A.Div     -> (let ets = L.string_of_lltype (L.type_of e1') in 
+              | _ -> raise(Failure("Ints and floats can be multiplied")))
+         |A.Div     ->
             (match ets with
                "double" -> L.build_fdiv 
                     |"i32" -> L.build_sdiv
-              | _ -> raise(Failure("Only ints and floats can be divided")) ))
+              | _ -> raise(Failure("Ints and floats can be divided")))
             ) e1' e2' "tmp" builder
       | SCall ("print_s",[e])->
         L.build_call printf_func [| (build_expr builder e) |] "printf" builder
@@ -173,6 +211,9 @@ let translate (globals, functions) =
         L.build_call sample [| (build_expr builder e) |] "sample" builder
       | SCall ("print", [e]) ->
         L.build_call printf_func [| int_format_str ; (build_expr builder e) |]
+          "printf" builder
+      | SCall ("print_f", [e]) ->
+        L.build_call printf_func [| float_format_str ; (build_expr builder e) |]
           "printf" builder
       | SCall (f, args) ->
         let (fdef, fdecl) = StringMap.find f function_decls in
