@@ -132,8 +132,12 @@ let translate (globals, functions) =
       | SDist (l) -> let events = List.map (build_expr builder) (l) in
                      let s = List.map L.string_of_llvalue events in
                      let process_string s = 
-                         let x1::x2::x = String.split_on_char '"' s in
-                          x2
+                         let y = String.split_on_char '"' s in
+                         match y with
+                            [] -> raise(Failure("empty Dist"))
+                          | (_::x2::x) -> x2
+                          | (_::[]) -> raise(Failure("empty Dist"))
+
                      in
                      let s2 = List.map process_string s in
                      let con = String.concat "," s2 in
@@ -152,7 +156,17 @@ let translate (globals, functions) =
          | A.Equal   -> L.build_icmp L.Icmp.Eq
          | A.Neq     -> L.build_icmp L.Icmp.Ne
          | A.Less    -> L.build_icmp L.Icmp.Slt
-        ) e1' e2' "tmp" builder
+         |A.Mult     -> (let ets = L.string_of_lltype (L.type_of e1') in 
+            (match ets with
+               "double" -> L.build_fmul
+                    |"i32" -> L.build_mul   
+              | _ -> raise(Failure("Only ints and floats can be divided")) ))
+         |A.Div     -> (let ets = L.string_of_lltype (L.type_of e1') in 
+            (match ets with
+               "double" -> L.build_fdiv 
+                    |"i32" -> L.build_sdiv
+              | _ -> raise(Failure("Only ints and floats can be divided")) ))
+            ) e1' e2' "tmp" builder
       | SCall ("print_s",[e])->
         L.build_call printf_func [| (build_expr builder e) |] "printf" builder
       | SCall ("sample",[e])->
