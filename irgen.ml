@@ -31,21 +31,24 @@ let translate (globals, functions) =
   and f_t      = L.float_type    context
   and i8_t       = L.i8_type     context
   and i1_t       = L.i1_type     context
-  and ptr_t  = L.pointer_type (L.i8_type (context))  
+  and ptr  = L.pointer_type (L.i8_type (context))  
   in
   let struct_dist_t : L.lltype = 
     L.named_struct_type context "Dist" in
+  let struct_event_t : L.lltype = 
+  L.named_struct_type context "Dist" in
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
       A.Int   -> i32_t
     | A.Float -> f_t
     | A.Bool  -> i1_t
-    | A.Dist   -> struct_dist_t
-    | A.String -> ptr_t
+    | A.Dist   -> ptr
+    | A.String -> ptr
+    | A.Event -> struct_event_t
   in
 
-  let _ = L.struct_set_body struct_dist_t [| L.pointer_type i1_t |] false in
-
+  let _ = L.struct_set_body struct_dist_t [| ptr;f_t;(L.pointer_type struct_dist_t) |] false in
+  let _ = L.struct_set_body struct_event_t [| ptr;f_t |] false in
   (* Create a map of global variables after creating each *)
   let global_vars : L.llvalue StringMap.t =
     let global_var m (t, n) =
@@ -60,13 +63,10 @@ let translate (globals, functions) =
 
   (* Declare Foo functions *)
   let sample_t : L.lltype =
-    L.function_type (L.void_type context)
-    [| L.pointer_type struct_dist_t |] in
-
+    L.function_type (ptr)
+    [| ptr |] in
   let sample : L.llvalue =
     L.declare_function "sample" sample_t the_module in
-  let initDist : L.llvalue =
-    L.declare_function "initDist" sample_t the_module in
 
   (* Define each function (arguments and return type) so we can
      call it even before we've created its body *)
@@ -99,11 +99,10 @@ let translate (globals, functions) =
       (* Allocate space for any locally declared variables and add the
        * resulting registers to our map *)
       and add_local m (t, n) =
-        let local_var = L.build_alloca (ltype_of_typ t) n builder in
+        let local_var = L.build_alloca (ltype_of_typ t) n builder (* in
         let _ = (match t with
-        | A.Dist -> ignore(L.build_call initDist [| local_var |] "" builder);
-                    L.build_call sample [| local_var |] "" builder; 
-        | _ -> local_var)
+        | A.Dist -> L.build_call initDist [| local_var |] "" builder
+        | _ -> local_var) *)
         in StringMap.add n local_var m
       in
 
@@ -124,8 +123,22 @@ let translate (globals, functions) =
       | SFloLit f -> L.const_float f_t f
       | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)
       | SId s       -> L.build_load (lookup s) s builder
-      | SAssign (s, e) -> let e' = build_expr builder e in
-        ignore(L.build_store e' (lookup s) builder); e'
+      | SAssign (s, e) -> 
+        let e' = build_expr builder e in
+          ignore(L.build_store e' (lookup s) builder); e'
+      | SEvent (s, p) -> 
+          let conc = s ^ ":" ^ (string_of_float p) in
+          L.const_string context conc
+      | SDist (l) -> let events = List.map (build_expr builder) (l) in
+                     let s = List.map L.string_of_llvalue events in
+                     let process_string s = 
+                         let x1::x2::x = String.split_on_char '"' s in
+                          x2
+                     in
+                     let s2 = List.map process_string s in
+                     let con = String.concat "," s2 in
+                     let send = L.build_global_stringptr con "tmp" builder in
+                     send
       | SStringLit str -> L.build_global_stringptr str "tmp" builder
       | SBinop (e1, op, e2) ->
         let e1' = build_expr builder e1
@@ -142,6 +155,8 @@ let translate (globals, functions) =
         ) e1' e2' "tmp" builder
       | SCall ("print_s",[e])->
         L.build_call printf_func [| (build_expr builder e) |] "printf" builder
+      | SCall ("sample",[e])->
+        L.build_call sample [| (build_expr builder e) |] "sample" builder
       | SCall ("print", [e]) ->
         L.build_call printf_func [| int_format_str ; (build_expr builder e) |]
           "printf" builder

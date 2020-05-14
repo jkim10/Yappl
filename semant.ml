@@ -33,12 +33,19 @@ let check (globals, functions) =
       formals = [(Int, "x")];
       locals = []; body = [] } StringMap.empty
   in
-  let built_in_decls =
+  let built_in_decls_2 =
     StringMap.add "print_s" {
       rtyp = String;
       fname = "print_s";
       formals = [(String, "x")];
       locals = []; body = [] } add_print_int
+  in
+  let built_in_decls =
+    StringMap.add "sample" {
+      rtyp = String;
+      fname = "sample";
+      formals = [(Dist, "x")];
+      locals = []; body = [] } built_in_decls_2
   in
 
   (* Add function name to symbol table *)
@@ -75,7 +82,6 @@ let check (globals, functions) =
     let check_assign lvaluet rvaluet err =
       if lvaluet = rvaluet then lvaluet else raise (Failure err)
     in
-
     (* Build local symbol table of variables for this function *)
     let symbols = List.fold_left (fun m (ty, name) -> StringMap.add name ty m)
         StringMap.empty (globals @ func.formals @ func.locals )
@@ -94,6 +100,12 @@ let check (globals, functions) =
       | BoolLit l -> (Bool, SBoolLit l)
       | StringLit s -> (String, SStringLit s)
       | Id var -> (type_of_identifier var, SId var)
+      | Dist l -> 
+        let l'= List.map check_expr l
+        in
+        (Dist, SDist(l'))
+      | Event(s,p) -> 
+        (Event, SEvent(s,p))
       | Assign(var, e) as ex ->
         let lt = type_of_identifier var
         and (rt, e') = check_expr e in

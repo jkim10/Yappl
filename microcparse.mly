@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD
+%token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD COLON
 %token EQ NEQ LT AND OR
 
 %token IF ELSE WHILE INT BOOL FLOAT DIST STR
@@ -16,6 +16,7 @@ open Ast
 %token <bool> BLIT
 %token <float> FLIT
 %token <string> ID
+
 %token EOF
 
 %start program
@@ -103,6 +104,8 @@ expr:
   | FLIT             { FloLit ($1)            }
   | BLIT             { BoolLit($1)            }
   | ID               { Id($1)                 }
+  | STRING COLON FLIT { Event($1,$3)           }
+  | LBRACE event_list RBRACE { Dist($2)}
   | expr PLUS   expr { Binop($1, Add,   $3)   }
   | expr MINUS  expr { Binop($1, Sub,   $3)   }
   | expr MOD    expr { Binop($1, Mod, $3)     }
@@ -116,6 +119,11 @@ expr:
   | LPAREN expr RPAREN { $2                   }
   /* call */
   | ID LPAREN args_opt RPAREN { Call ($1, $3)  }
+
+event_list:
+  {[]}
+  | expr {[$1]}
+  | expr COMMA event_list {$1 :: $3}
 
 /* args_opt*/
 args_opt:

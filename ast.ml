@@ -2,7 +2,7 @@
 
 type op = Add | Sub | Equal | Neq | Less | And | Or | Mod
 
-type typ = Int | Bool | Float | Dist | String
+type typ = Int | Bool | Float | Dist | String | Event
 
 type expr =
     Literal of int
@@ -12,6 +12,8 @@ type expr =
   | Binop of expr * op * expr
   | Assign of string * expr
   | StringLit of string
+  | Event of string * float
+  | Dist of (expr) list
   (* function call *)
   | Call of string * expr list
 
@@ -55,6 +57,8 @@ let rec string_of_expr = function
   | BoolLit(false) -> "false"
   | Id(s) -> s
   | StringLit(s) -> s
+  | Event(s,p) -> s ^ ":" ^ string_of_float p
+  | Dist(l) -> "{" ^ String.concat "|" (List.map string_of_expr l) ^ "}"
   | Binop(e1, o, e2) ->
     string_of_expr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_expr e2
   | Assign(v, e) -> v ^ " = " ^ string_of_expr e
@@ -76,6 +80,7 @@ let string_of_typ = function
   | Dist -> "dist"
   | String -> "string"
   | Float -> "float"
+  | Event -> "event"
 
 let string_of_vdecl (t, id) = string_of_typ t ^ " " ^ id ^ ";\n"
 

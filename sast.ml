@@ -10,6 +10,8 @@ and sx =
   | SId of string
   | SBinop of sexpr * op * sexpr
   | SAssign of string * sexpr
+  | SEvent of string * float
+  | SDist of sexpr list
   | SStringLit of string
   (* call *)
   | SCall of string * sexpr list
@@ -40,10 +42,12 @@ let rec string_of_sexpr (t, e) =
   "(" ^ string_of_typ t ^ " : " ^ (match e with
         SLiteral(l) -> string_of_int l
       | SFloLit(l) -> string_of_float l
+      | SDist(l) -> "{" ^ String.concat "|" (List.map string_of_sexpr l) ^ "}"
       | SStringLit(l) -> l
       | SBoolLit(true) -> "true"
       | SBoolLit(false) -> "false"
       | SId(s) -> s
+      | SEvent(s,p) -> s ^ ":" ^ string_of_float p
       | SBinop(e1, o, e2) ->
         string_of_sexpr e1 ^ " " ^ string_of_op o ^ " " ^ string_of_sexpr e2
       | SAssign(v, e) -> v ^ " = " ^ string_of_sexpr e
