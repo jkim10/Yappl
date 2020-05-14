@@ -28,10 +28,7 @@ struct Dist *makeNode(struct Dist ** head_ref, char ** dist){
   printf("value: %s  \t", n->n);
 
   char * token = strtok(copy_of_dist, delim);
-
-  for (int i=0; i<1; i++){
-    token = strtok(NULL, delim);
-  }
+  token = strtok(NULL, delim); // parses again to get probability
 
 	n->p = atof(token);
   printf("prob: %f\n", n->p);
