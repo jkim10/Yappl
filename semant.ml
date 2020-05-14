@@ -24,7 +24,6 @@ let check (globals, functions) =
 
   (* Make sure no globals duplicate *)
   check_binds "global" globals;
-
   (* Collect function declarations for built-in functions: no bodies *)
   let add_print_int =
     StringMap.add "print" {
@@ -33,19 +32,26 @@ let check (globals, functions) =
       formals = [(Int, "x")];
       locals = []; body = [] } StringMap.empty
   in
-  let built_in_decls_2 =
+  let add_print_string =
     StringMap.add "print_s" {
       rtyp = String;
       fname = "print_s";
       formals = [(String, "x")];
       locals = []; body = [] } add_print_int
   in
+  let add_print_float =
+    StringMap.add "print_f" {
+      rtyp = Float;
+      fname = "print_f";
+      formals = [(Float, "x")];
+      locals = []; body = [] } add_print_string
+  in
   let built_in_decls =
     StringMap.add "sample" {
       rtyp = String;
       fname = "sample";
       formals = [(Dist, "x")];
-      locals = []; body = [] } built_in_decls_2
+      locals = []; body = [] } add_print_float
   in
 
   (* Add function name to symbol table *)
@@ -127,9 +133,9 @@ let check (globals, functions) =
           let t = match op with
               Add | Sub | Mod | Mult | Div when t1 = Int -> Int
             | Add | Sub | Mod | Mult | Div when t1 = Float -> Float
-            | Equal | Neq -> Bool
-            | Less when t1 = Int -> Bool
-            | Less when t1 = Float -> Bool
+            | Equal | Neq when t1 = t2 -> Bool
+            | Less | Leq | Greater | Geq when t1 = Int -> Bool
+            | Less | Leq | Greater | Geq when t1 = Float -> Bool
             | And | Or when t1 = Bool -> Bool
             | _ -> raise (Failure err)
           in
