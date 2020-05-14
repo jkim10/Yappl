@@ -8,6 +8,8 @@ struct Dist {
   struct Dist *next;
 };
 
-char* sample(char *dist);
+void printList(struct Dist **head_ref, int size);
 
+struct Dist *makeNode(struct Dist ** head_ref, char ** dist);
 
+char * sample(struct Dist ** head_ref, int size);

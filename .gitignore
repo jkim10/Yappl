@@ -5,6 +5,7 @@ _build
 # C_Code
 c_code/sampling
 c_code/distribution
+dist
 *.dSYM
 
 # MacOS Users
