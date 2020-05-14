@@ -31,7 +31,6 @@ let translate (globals, functions) =
   and f_t      = L.float_type    context
   and i8_t       = L.i8_type     context
   and i1_t       = L.i1_type     context
-  and void_t = L.void_type context
   and ptr_t  = L.pointer_type (L.i8_type (context))  
   in
   let struct_dist_t : L.lltype = 
@@ -102,8 +101,8 @@ let translate (globals, functions) =
       and add_local m (t, n) =
         let local_var = L.build_alloca (ltype_of_typ t) n builder in
         let _ = (match t with
-        | A.Dist -> L.build_call initDist [| local_var |] "" builder;
-                    L.build_call sample [| local_var |] "" builder;
+        | A.Dist -> ignore(L.build_call initDist [| local_var |] "" builder);
+                    L.build_call sample [| local_var |] "" builder; 
         | _ -> local_var)
         in StringMap.add n local_var m
       in

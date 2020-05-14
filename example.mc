@@ -1,7 +1,8 @@
 /* The GCD algorithm in MicroC */
-int a;
-int b;
-
+int x; 
+x = 11;
+print(x);
+print(444);
 int gcd(int a, int b) {
   while (a != b) {
     if (b < a) a = a - b;
@@ -9,9 +10,8 @@ int gcd(int a, int b) {
   }
   return a;
 }
-int x; 
-x = 11;
-print(x);
-print(444);
+string s;
+s="test";
+print_s(s);
 return 0;
 

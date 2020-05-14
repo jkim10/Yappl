@@ -7,8 +7,6 @@ open Ast
 %token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD
 %token EQ NEQ LT AND OR
 
-%token IF ELSE WHILE INT BOOL DIST STR
-
 %token IF ELSE WHILE INT BOOL FLOAT DIST STR
 
 /* return, COMMA token */
@@ -35,12 +33,19 @@ open Ast
 
 /* add function declarations*/
 program:
-  decls EOF { $1}
+  decls EOF { ([],{
+                        rtyp=Int;
+                        fname="main";
+                        formals=[];
+                        locals=fst (snd $1);
+                        body=fst $1
+                      }:: snd (snd $1))}
 
 decls:
-   /* nothing */ { ([], [])               }
- | vdecl SEMI decls { (($1 :: fst $3), snd $3) }
- | fdecl decls { (fst $2, ($1 :: snd $2)) }
+   /* nothing */ { ([],([], []))             }
+ | vdecl SEMI decls { (fst $3,(($1 :: fst (snd $3)), snd (snd $3))) }
+ | fdecl decls { (fst $2, (fst (snd $2), ($1 :: snd (snd $2)))) }
+ | stmt_list decls { ($1@fst $2,snd $2)}
 
 vdecl_list:
   /*nothing*/ { [] }
@@ -67,16 +72,6 @@ fdecl:
       formals=$3;
       locals=$6;
       body=$7
-    }
-  }
-  | stmt_list 
-  {
-    {
-      rtyp=Int;
-      fname="main";
-      formals=[];
-      locals=[];
-      body=$1
     }
   }
 

@@ -17,7 +17,7 @@ let check (globals, functions) =
     let rec dups = function
         [] -> ()
       |	((_,n1) :: (_,n2) :: _) when n1 = n2 ->
-        raise (Failure ("duplicate " ^ kind ^ " " ^ n1))
+        raise (Failure ("duplicate " ^ kind ^ " " ^ n1));
       | _ :: t -> dups t
     in dups (List.sort (fun (_,a) (_,b) -> compare a b) binds)
   in
