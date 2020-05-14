@@ -1,8 +1,13 @@
-struct Dist {
-     char* d;
+struct Event{
+	char* e;
 };
 
-void sample(struct Dist *dist);
+struct Dist {
+  char * n;
+  float p;
+  struct Dist *next;
+};
 
-void initDist(struct Dist *dist);
+char* sample(char *dist);
+
 

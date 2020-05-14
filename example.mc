@@ -1,16 +1,6 @@
 /* The GCD algorithm in MicroC */
-int gcd(int a, int b) {
-  while (a != b) {
-    if (b < a) a = a - b;
-    else b = b - a;
-  }
-  return a;
-}
-string hello(string a){
-	print_s(a);
-	return "hello";
-}
-print(444);
-print_s(hello("test"));
+dist z;
+z={"t":0.5,"test":0.3,"test2":0.2};
+print_s(sample(z));
 return 0;
 
