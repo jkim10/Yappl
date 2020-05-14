@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD COLON
+%token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD COLON MULT DIV
 %token EQ NEQ LT AND OR
 
 %token IF ELSE WHILE INT BOOL FLOAT DIST STR
@@ -114,6 +114,8 @@ expr:
   | expr LT     expr { Binop($1, Less,  $3)   }
   | expr AND    expr { Binop($1, And,   $3)   }
   | expr OR     expr { Binop($1, Or,    $3)   }
+  | expr MULT   expr { Binop($1, Mult, $3)    }
+  | expr DIV    expr { Binop($1, Div, $3 )}
   | STRING       { StringLit($1) } 
   | ID ASSIGN expr   { Assign($1, $3)         }
   | LPAREN expr RPAREN { $2                   }
@@ -122,8 +124,9 @@ expr:
 
 event_list:
   {[]}
-  | expr {[$1]}
-  | expr COMMA event_list {$1 :: $3}
+  | STRING COLON FLIT {[Event($1,$3)]}
+  | expr COMMA event_list {$1 :: $3}     
+
 
 /* args_opt*/
 args_opt:
