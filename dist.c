@@ -58,8 +58,7 @@ int main(){
   char input[] = "t:0.5,test:0.3,test2:0.2";
   const char comma[2] = ",";
 
-  char * token = NULL;
-  char * copy_token = NULL;
+  char * token = (char *) malloc(sizeof(char *));
   int number_of_item = 0;
 
   token = strtok(input, comma);
@@ -67,12 +66,14 @@ int main(){
   struct Dist * output = (struct Dist *) malloc(sizeof(struct Dist));
 
   while (token != NULL){
-    printf("token: %s\n", token);
-    copy_token = token;
+    printf("before makeNode: %s\n", token);
     ++number_of_item;
 
     output = makeNode(&output, &token);
+
+    printf("after makeNode/before strtok: %s\n", token);
     token = strtok(NULL, comma);
+    printf("after strtok: %s\n", token);
   }
 
   printf("\n");
@@ -80,7 +81,8 @@ int main(){
 
   printf("\n");
   char * returned_sample = sample(&output, number_of_item);
-  free(returned_sample);
 
+  free(returned_sample);
+  free(token);
   return 0;
 }
