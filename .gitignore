@@ -15,3 +15,5 @@ microc.native
 example.out
 example.ll
 a.out
+
+.DS_store
