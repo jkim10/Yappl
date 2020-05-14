@@ -9,7 +9,7 @@ void printList(struct Dist **head_ref, int size) {
   if (size <= 0) {
     return;
   }
-  printf("--- Number of Cards: %d\n", size);
+  printf("--- Number of Items: %d\n", size);
   struct Dist * temp = *head_ref;
   while (temp != NULL) {
     printf("value: %s   \tprob: %f\n", temp->n, temp->p);
@@ -19,25 +19,27 @@ void printList(struct Dist **head_ref, int size) {
 
 struct Dist *makeNode(struct Dist ** head_ref, char ** dist){
   struct Dist * n = *head_ref;
-	const char delim[2]= ":";
-  char copy_of_dist[255];
+  char * token = (char *) malloc(sizeof(char *));
+  strcpy(token, *dist);
+  const char delim[2]= ":";
 
-  strcpy(copy_of_dist, *dist);
-
-  n->n = strtok(*dist, delim);
-  printf("value: %s  \t", n->n);
-
-  char * token = strtok(copy_of_dist, delim);
-  token = strtok(NULL, delim); // parses again to get probability
-
-	n->p = atof(token);
-  printf("prob: %f\n", n->p);
+  char * value = NULL;
+  value = strtok(token, delim);
+  printf("value: %s\t", value);
+  n->n = value;
+  value = strtok(NULL, delim);
+  printf("prob: %s\n", value);
+  n->p = atof(value);
 
   n->next = NULL;
-	return n;
+  free(token);
+  return n;
 }
 
 char * sample(struct Dist ** head_ref, int size){
+   if (size <= 0){
+     return "No items to sample";
+   }
    int randomnumber = rand()%(1+size);
    struct Dist * temp = *head_ref;
 
@@ -50,12 +52,6 @@ char * sample(struct Dist ** head_ref, int size){
    printf("%s\n", result);
 
    return result;
-}
-
-void fillDist(struct Dist *dist,char * d){
-	dist->n=d;
-	dist->p=3.3;
-	dist->next=NULL;
 }
 
 int main(){
