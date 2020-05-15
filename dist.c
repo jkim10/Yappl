@@ -30,7 +30,7 @@ struct Dist *makeNode(struct Dist ** head_ref, char ** dist){
   value = strtok(NULL, delim);
   printf("prob: %s\n", value);
   n->p = atof(value);
-
+  
   n->next = NULL;
   free(token);
   return n;
@@ -57,23 +57,18 @@ char * sample(struct Dist ** head_ref, int size){
 int main(){
   char input[] = "t:0.5,test:0.3,test2:0.2";
   const char comma[2] = ",";
+  char* rest = NULL;
 
   char * token = (char *) malloc(sizeof(char *));
   int number_of_item = 0;
 
-  token = strtok(input, comma);
-
   struct Dist * output = (struct Dist *) malloc(sizeof(struct Dist));
 
-  while (token != NULL){
-    printf("before makeNode: %s\n", token);
+  for (token = strtok_r(input, ",", &rest); token != NULL; token = strtok_r(NULL, ",", &rest))
+  {
     ++number_of_item;
-
     output = makeNode(&output, &token);
-
-    printf("after makeNode/before strtok: %s\n", token);
-    token = strtok(NULL, comma);
-    printf("after strtok: %s\n", token);
+    printf("token: %s\n", token);
   }
 
   printf("\n");
@@ -81,8 +76,6 @@ int main(){
 
   printf("\n");
   char * returned_sample = sample(&output, number_of_item);
-
-  free(returned_sample);
   free(token);
   return 0;
 }
