@@ -56,26 +56,34 @@ char * sample(struct Dist ** head_ref, int size){
 
 int main(){
   char input[] = "t:0.5,test:0.3,test2:0.2";
-  const char comma[2] = ",";
   char* rest = NULL;
 
   char * token = (char *) malloc(sizeof(char *));
   int number_of_item = 0;
 
   struct Dist * output = (struct Dist *) malloc(sizeof(struct Dist));
+  struct Dist ** p_output = &output;
 
+  int counter = 0;
   for (token = strtok_r(input, ",", &rest); token != NULL; token = strtok_r(NULL, ",", &rest))
   {
+    if (counter == 0){
+      output = makeNode(&output, &token);
+    } else {
+      struct Dist * temp_output = (struct Dist *) malloc(sizeof(struct Dist));
+      temp_output = makeNode(&temp_output, &token);
+      output->next = temp_output;
+    }
     ++number_of_item;
-    output = makeNode(&output, &token);
+    ++counter;
     printf("token: %s\n", token);
   }
 
   printf("\n");
-  printList(&output, number_of_item);
+  printList(p_output, number_of_item);
 
   printf("\n");
-  char * returned_sample = sample(&output, number_of_item);
+  sample(&output, number_of_item);
   free(token);
   return 0;
 }
