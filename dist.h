@@ -3,9 +3,7 @@ struct Event{
 };
 
 struct Dist {
-  char * n;
-  float p;
-  struct Dist *next;
+  char * e;
 };
 
 char* sample(char *dist);
