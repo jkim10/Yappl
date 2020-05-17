@@ -31,24 +31,28 @@ let translate (globals, functions) =
   and f_t        = L.double_type context
   and i8_t       = L.i8_type     context
   and i1_t       = L.i1_type     context
-  and ptr  = L.pointer_type (L.i8_type (context))  
+  and ptr  = L.pointer_type (L.i8_type (context))
   in
+  let dist_array_t = L.array_type (ptr) 100 in
   let struct_dist_t : L.lltype = 
     L.named_struct_type context "Dist" in
   let struct_event_t : L.lltype = 
-  L.named_struct_type context "Dist" in
+  L.named_struct_type context "Event" in
   (* Return the LLVM type for a MicroC type *)
   let ltype_of_typ = function
       A.Int   -> i32_t
     | A.Float -> f_t
     | A.Bool  -> i1_t
-    | A.Dist   -> ptr
+    | A.Dist   -> dist_array_t
     | A.String -> ptr
     | A.Event -> struct_event_t
   in
-
-  let _ = L.struct_set_body struct_dist_t [| ptr;f_t;(L.pointer_type struct_dist_t) |] false in
-  let _ = L.struct_set_body struct_event_t [| ptr;f_t |] false in
+  
+  let event_ptr_t = L.pointer_type (struct_event_t) in
+  let dist_ptr_t = L.pointer_type (struct_dist_t) in
+  let vptr_t = L.pointer_type (L.i8_type context) in
+  let _ = L.struct_set_body struct_event_t [| L.pointer_type (ptr);f_t|] false in
+  let _ = L.struct_set_body struct_dist_t [| i32_t;vptr_t;vptr_t |] false in
   (* Create a map of global variables after creating each *)
   let global_vars : L.llvalue StringMap.t =
     let global_var m (t, n) =
@@ -61,10 +65,24 @@ let translate (globals, functions) =
   let printf_func : L.llvalue =
     L.declare_function "printf" printf_t the_module in
 
+  let dist_init_t = L.function_type struct_dist_t ( [||] ) in
+  let dist_init_f = L.declare_function "dist_init" dist_init_t the_module in
+
+  (* let event_init_t = L.function_type event_ptr_t ( [||] ) in
+  let event_init_f = L.declare_function "event_init" dist_init_t the_module in *)
+(* 
+  let dist_get_t = L.function_type vptr_t [| dist_ptr_t; vptr_t |] in
+  let dist_get_f = L.declare_function "dist_get" dist_get_t the_module in *)
+
+  let dist_set_t = L.function_type vptr_t [|struct_dist_t;ptr;ptr|] in
+  let dist_set_f = L.declare_function "dist_set" dist_set_t the_module in
+  let get_ptr n = ptr in
+
   (* Declare Foo functions *)
   let sample_t : L.lltype =
     L.function_type (ptr)
-    [| ptr |] in
+    (Array.of_list (List.init 100 get_ptr))
+  in
   let sample : L.llvalue =
     L.declare_function "sample" sample_t the_module in
 
@@ -78,7 +96,6 @@ let translate (globals, functions) =
       in let ftype = L.function_type (ltype_of_typ fdecl.srtyp) formal_types in
       StringMap.add name (L.define_function name ftype the_module, fdecl) m in
     List.fold_left function_decl StringMap.empty functions in
-
   (* Fill in the body of the given function *)
   let build_function_body fdecl =
     let (the_function, _) = StringMap.find fdecl.sfname function_decls in
@@ -100,11 +117,11 @@ let translate (globals, functions) =
       (* Allocate space for any locally declared variables and add the
        * resulting registers to our map *)
       and add_local m (t, n) =
-        let local_var = L.build_alloca (ltype_of_typ t) n builder (* in
-        let _ = (match t with
-        | A.Dist -> L.build_call initDist [| local_var |] "" builder
-        | _ -> local_var) *)
-        in StringMap.add n local_var m
+        let local_var = L.build_alloca (ltype_of_typ t) n builder in
+        let local_var2 = (match t with
+        | A.Dist -> L.build_array_alloca dist_array_t (L.const_int i32_t 100) "array_init" builder
+        | _ -> local_var)
+        in StringMap.add n local_var2 m
       in
 
       let formals = List.fold_left2 add_formal StringMap.empty fdecl.sformals
@@ -119,31 +136,72 @@ let translate (globals, functions) =
     in
 
     (* Construct code for an expression; return its value *)
-    let rec build_expr builder ((_, e) : sexpr) = match e with
+    (* let get_key_value d = 
+      let (_,e) = d in
+        match e with
+           SEvent(s,p) ->
+            let x = ref [] in
+            for i = 1 to (int_of_float (Float.mul p 100.0)) do
+                let a = (L.build_global_stringptr s "ee" builder) in
+                let allocate = L.build_alloca ptr "event_string" builder in
+                let store = L.build_store a allocate builder in
+                x := !x @ [allocate]
+            done;
+            !x
+          | _ -> raise (Failure "not implemented")
+    in *)
+    let distributions:(string, L.llvalue) Hashtbl.t = Hashtbl.create 50 in
+
+      let add_distribution s e =
+          Hashtbl.add distributions s e
+    in
+    let rec build_expr builder ((styp, e) : sexpr) = match e with
         SLiteral i  -> L.const_int i32_t i
       | SFloLit f -> L.const_float f_t f
       | SBoolLit b  -> L.const_int i1_t (if b then 1 else 0)
-      | SId s       -> L.build_load (lookup s) s builder
+      | SId s       ->
+        (match styp with
+         A.Dist -> Hashtbl.find distributions s
+        |_ -> L.build_load (lookup s) s builder)
       | SAssign (s, e) -> 
         let e' = build_expr builder e in
-          ignore(L.build_store e' (lookup s) builder); e'
+          (match styp with
+            A.Dist -> Hashtbl.add distributions s e';ignore(L.build_store e' (lookup s) builder); e'
+            | _ -> ignore(L.build_store e' (lookup s) builder); e'
+          );
       | SEvent (s, p) -> 
-          let conc = s ^ ":" ^ (string_of_float p) in
-          L.const_string context conc
-      | SDist (l) -> let events = List.map (build_expr builder) (l) in
-                     let s = List.map L.string_of_llvalue events in
-                     let process_string s = 
-                         let y = String.split_on_char '"' s in
-                         match y with
-                            [] -> raise(Failure("empty Dist"))
-                          | (_::x2::x) -> x2
-                          | (_::[]) -> raise(Failure("empty Dist"))
-
-                     in
-                     let s2 = List.map process_string s in
-                     let con = String.concat "," s2 in
-                     let send = L.build_global_stringptr con "tmp" builder in
-                     send
+          let key_ = (
+                let key_ = L.build_malloc ptr "key" builder in
+                ignore (L.build_store (L.build_global_stringptr s "tmp" builder) key_ builder); key_
+              ) in
+          let value_ = (
+                let data = L.build_malloc f_t "value" builder in
+                ignore (L.build_store (L.const_float f_t p) data builder); data
+              ) in
+          let key = L.build_bitcast key_ vptr_t "key" builder in
+          let value = L.build_bitcast value_ vptr_t "val" builder in
+          let event = L.const_named_struct struct_event_t [|key;value|] in
+          event
+      | SDist (l) ->
+      let get_key_value d = 
+          let (_,e) = d in
+            match e with
+               SEvent(s,p) ->
+                let x = ref [] in
+                for i = 1 to (int_of_float (Float.mul p 100.0)) do
+                    let a = L.build_global_stringptr s "tmp" builder in
+                    (* let allocate = L.build_malloc (L.type_of a) "event_string" builder in
+                    let store = L.build_store a allocate builder in *)
+                    x := !x @ [a]
+                done;
+                !x
+              | _ -> raise (Failure "not implemented")
+        in
+        let e = List.map get_key_value (l) in
+        let e' = List.flatten e in
+        let data = L.const_array ptr (Array.of_list e') in
+(*         let bitcast = L.build_bitcast data (L.pointer_type dist_array_t) "ARRAY2PTR" builder in
+ *)     data
       | SStringLit str -> L.build_global_stringptr str "tmp" builder
       | SBinop (e1, op, e2) ->
         let e1' = build_expr builder e1
@@ -208,7 +266,12 @@ let translate (globals, functions) =
       | SCall ("print_s",[e])->
         L.build_call printf_func [| (build_expr builder e) |] "printf" builder
       | SCall ("sample",[e])->
-        L.build_call sample [| (build_expr builder e) |] "sample" builder
+        let e' = build_expr builder e in
+        let get_event n =
+              L.const_extractvalue e' [|n|]
+            in
+        let event_list = List.init 100 get_event in
+        L.build_call sample (Array.of_list event_list) "sample" builder
       | SCall ("print", [e]) ->
         L.build_call printf_func [| int_format_str ; (build_expr builder e) |]
           "printf" builder

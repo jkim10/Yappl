@@ -52,8 +52,11 @@ float b;
 b=5.0;
 if(b==5.0) print_s(pass); else print_s(fail);
 print_s("Dist Var:\n"); /*Add to this*/
+
 dist d;
-d={"A":0.5,"BCD":0.5};
+d={"BOB":0.5,"JER":0.5};
+
+
 print_s(sample(d));
 
 
