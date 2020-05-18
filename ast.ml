@@ -1,6 +1,6 @@
 (* Abstract Syntax Tree and functions for printing it *)
 
-type op = Add | Sub | Equal | Neq | Less | And | Or | Mod | Mult | Div | Geq | Leq | Greater
+type op = Add | Sub | Equal | Neq | Less | And | Or | Mod | Mult | Div | Geq | Leq | Greater | Sampl
 
 type typ = Int | Bool | Float | Dist | String | Event
 
@@ -10,6 +10,7 @@ type expr =
   | BoolLit of bool
   | Id of string
   | Binop of expr * op * expr
+  | Unop of op * expr
   | Assign of string * expr
   | StringLit of string
   | Event of string * float
@@ -54,6 +55,7 @@ let string_of_op = function
   | Greater -> "<"
   | Geq -> ">="
   | Leq -> "<="
+  | Sampl -> "#"
 
 let rec string_of_expr = function
     Literal(l) -> string_of_int l
@@ -62,6 +64,7 @@ let rec string_of_expr = function
   | BoolLit(false) -> "false"
   | Id(s) -> s
   | StringLit(s) -> s
+  | Unop(o,e) -> string_of_op o ^ " " ^ string_of_expr e
   | Event(s,p) -> s ^ ":" ^ string_of_float p
   | Dist(l) -> "{" ^ String.concat "|" (List.map string_of_expr l) ^ "}"
   | Binop(e1, o, e2) ->

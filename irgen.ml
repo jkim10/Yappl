@@ -48,8 +48,6 @@ let translate (globals, functions) =
     | A.Event -> struct_event_t
   in
   
-  let event_ptr_t = L.pointer_type (struct_event_t) in
-  let dist_ptr_t = L.pointer_type (struct_dist_t) in
   let vptr_t = L.pointer_type (L.i8_type context) in
   let _ = L.struct_set_body struct_event_t [| L.pointer_type (ptr);f_t|] false in
   let _ = L.struct_set_body struct_dist_t [| i32_t;vptr_t;vptr_t |] false in
@@ -65,17 +63,6 @@ let translate (globals, functions) =
   let printf_func : L.llvalue =
     L.declare_function "printf" printf_t the_module in
 
-  let dist_init_t = L.function_type struct_dist_t ( [||] ) in
-  let dist_init_f = L.declare_function "dist_init" dist_init_t the_module in
-
-  (* let event_init_t = L.function_type event_ptr_t ( [||] ) in
-  let event_init_f = L.declare_function "event_init" dist_init_t the_module in *)
-(* 
-  let dist_get_t = L.function_type vptr_t [| dist_ptr_t; vptr_t |] in
-  let dist_get_f = L.declare_function "dist_get" dist_get_t the_module in *)
-
-  let dist_set_t = L.function_type vptr_t [|struct_dist_t;ptr;ptr|] in
-  let dist_set_f = L.declare_function "dist_set" dist_set_t the_module in
   let get_ptr n = ptr in
 
   (* Declare Foo functions *)
@@ -150,10 +137,7 @@ let translate (globals, functions) =
             !x
           | _ -> raise (Failure "not implemented")
     in *)
-    let distributions:(string, L.llvalue) Hashtbl.t = Hashtbl.create 50 in
-
-      let add_distribution s e =
-          Hashtbl.add distributions s e
+    let distributions:(string, L.llvalue) Hashtbl.t = Hashtbl.create 50
     in
     let rec build_expr builder ((styp, e) : sexpr) = match e with
         SLiteral i  -> L.const_int i32_t i
@@ -251,7 +235,7 @@ let translate (globals, functions) =
                "double" -> L.build_fcmp L.Fcmp.Uge
                     |"i32" -> L.build_icmp L.Icmp.Sge  
               | _ -> raise(Failure("Ints and floats can be compared")))
-
+         | A.Sampl -> raise(Failure("Not a BINOP"))
          | A.Mult     ->
             (match ets with
                "double" -> L.build_fmul
@@ -265,6 +249,17 @@ let translate (globals, functions) =
             ) e1' e2' "tmp" builder
       | SCall ("print_s",[e])->
         L.build_call printf_func [| (build_expr builder e) |] "printf" builder
+      | SUnop(op,e) ->
+        (match op with
+          A.Sampl ->
+            let e' = build_expr builder e in
+            let get_event n =
+                  L.const_extractvalue e' [|n|]
+                in
+            let event_list = List.init 100 get_event in
+            L.build_call sample (Array.of_list event_list) "sample" builder
+          |_-> raise (Failure "not implemented")
+        )
       | SCall ("sample",[e])->
         let e' = build_expr builder e in
         let get_event n =

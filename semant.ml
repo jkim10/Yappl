@@ -119,7 +119,13 @@ let check (globals, functions) =
                   string_of_typ rt ^ " in " ^ string_of_expr ex
         in
         (check_assign lt rt err, SAssign(var, (rt, e')))
-
+      | Unop(op,e) ->
+        let (t,e') = check_expr e in
+        let t' = (match op with
+            Sampl when t = Dist -> String
+          |_ -> raise (Failure "Unary op error")
+        ) in
+        (t',SUnop(op,(t,e')))
       | Binop(e1, op, e2) as e ->
         let (t1, e1') = check_expr e1
         and (t2, e2') = check_expr e2 in

@@ -8,6 +8,7 @@ and sx =
   | SFloLit of float
   | SBoolLit of bool
   | SId of string
+  | SUnop of op * sexpr
   | SBinop of sexpr * op * sexpr
   | SAssign of string * sexpr
   | SEvent of string * float
@@ -41,6 +42,7 @@ type sprogram = bind list * sfunc_def list
 let rec string_of_sexpr (t, e) =
   "(" ^ string_of_typ t ^ " : " ^ (match e with
         SLiteral(l) -> string_of_int l
+      | SUnop(o,e) -> string_of_op o ^ " " ^ string_of_sexpr e
       | SFloLit(l) -> string_of_float l
       | SDist(l) -> "{" ^ String.concat "|" (List.map string_of_sexpr l) ^ "}"
       | SStringLit(l) -> l

@@ -22,6 +22,7 @@ rule token = parse
 | '*'      { MULT }
 | '/'      { DIV  }
 | '='      { ASSIGN }
+| '#'      { SAMPL }
 | "=="     { EQ }
 | "!="     { NEQ }
 | '<'      { LT }

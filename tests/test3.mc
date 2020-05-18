@@ -5,10 +5,10 @@ dist greeting;
 greeting={"Hello":0.5,"Greetings":0.5};
 
 
-print_s(sample(greeting));
+print_s(#greeting);
 
 print_s(" ");
 
-print_s(sample(place));
+print_s(#place);
 
 print_s("\n");

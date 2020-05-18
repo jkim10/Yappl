@@ -4,7 +4,7 @@
 open Ast
 %}
 
-%token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD COLON MULT DIV
+%token SEMI LPAREN RPAREN LBRACE RBRACE PLUS MINUS ASSIGN MOD COLON MULT DIV SAMPL
 %token EQ NEQ LT AND OR GEQ LEQ GT
 
 %token IF ELSE WHILE INT BOOL FLOAT DIST STR
@@ -119,7 +119,7 @@ expr:
   | expr GEQ    expr { Binop($1, Geq, $3 )}
   | expr LEQ    expr { Binop($1, Leq, $3 )}
   | expr GT     expr { Binop($1, Greater, $3 )}
-
+  | SAMPL expr {Unop(Sampl,$2)}
   | STRING       { StringLit($1) } 
   | ID ASSIGN expr   { Assign($1, $3)         }
   | LPAREN expr RPAREN { $2                   }
